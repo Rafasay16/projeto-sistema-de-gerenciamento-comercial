@@ -1,0 +1,104 @@
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
+import { toast } from "sonner";
+import { Store, ArrowLeft, Loader2, Sun, Moon } from "lucide-react";
+import ParticleBackground from "../components/ui/ParticleBackground";
+
+export default function SignupPage() {
+  const navigate = useNavigate();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+    document.documentElement.classList.toggle('dark', newTheme);
+    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+  };
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    if (!name || !email || !password) return toast.error("Preencha todos os dados.");
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:3000/api/signup", {
+        method: "POST", 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Conta criada com sucesso. Por favor, inicie sessão.");
+        navigate("/login");
+      } else toast.error(data.error || "Erro ao criar conta.");
+    } catch (err) { 
+      toast.error("Erro de conexão com o servidor."); 
+    } finally { 
+      setLoading(false); 
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-background text-foreground transition-colors duration-300">
+      <ParticleBackground />
+      <button 
+        onClick={toggleDarkMode} 
+        className="absolute top-8 right-8 p-3 rounded-full hover:bg-secondary text-foreground transition-colors z-20"
+      >
+        {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
+      </button>
+      <div className="absolute top-8 left-8 flex items-center gap-2 text-primary font-bold text-xl z-10 drop-shadow-sm">
+        <Store size={28} /> <span className="hidden sm:inline">InsightGestor</span>
+      </div>
+      <Card className="w-full max-w-md border-border shadow-2xl relative z-10 bg-card/80 backdrop-blur-xl animate-in zoom-in-95 duration-500">
+        <CardHeader className="space-y-2 text-center pb-6">
+          <CardTitle className="text-3xl font-black tracking-tight text-foreground">Registro</CardTitle>
+          <CardDescription className="text-muted-foreground text-sm">Crie a sua conta para gerir o seu negócio.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSignup} className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Nome Completo</label>
+              <Input type="text" placeholder="Ex: Matheus Silva" value={name} onChange={(e) => setName(e.target.value)} className="h-12 bg-background/50" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Email Corporativo</label>
+              <Input type="email" placeholder="admin@exemplo.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 bg-background/50" />
+            </div>
+            <div className="space-y-1 pb-2">
+              <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Palavra-passe</label>
+              <Input type="password" placeholder="Mínimo 8 caracteres" value={password} onChange={(e) => setPassword(e.target.value)} className="h-12 bg-background/50" />
+            </div>
+            <Button type="submit" className="w-full h-12 text-base font-bold" disabled={loading}>
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Registrar"}
+            </Button>
+          </form>
+          <div className="mt-8 text-center text-sm text-muted-foreground border-t border-border pt-6">
+            Já possui uma conta?{" "}
+            <Link to="/login" className="text-primary font-bold hover:underline inline-flex items-center gap-1">
+              <ArrowLeft size={14} /> Voltar ao Login
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
