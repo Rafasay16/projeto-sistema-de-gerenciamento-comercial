@@ -1,0 +1,79 @@
+@theme {
+  /* Tailwind v4 Color Mapping */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  
+  /* Radius Variables */
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+@layer base {
+  :root {
+    --background: 210 24% 96%; 
+    --foreground: 0 0% 13%; 
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 13%;
+    --primary: 165 100% 25%; 
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 14% 89%; 
+    --secondary-foreground: 0 0% 13%;
+    --muted: 210 14% 96%;
+    --muted-foreground: 210 9% 45%; 
+    --accent: 210 14% 96%;
+    --accent-foreground: 0 0% 13%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 14% 89%; 
+    --input: 210 14% 89%;
+    --ring: 165 100% 25%;
+    --radius: 0.5rem; 
+  }
+
+  .dark {
+    --background: 210 11% 10%; 
+    --foreground: 210 20% 98%; 
+    --card: 210 11% 15%; 
+    --card-foreground: 210 20% 98%;
+    --primary: 165 100% 35%; 
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 11% 20%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 210 11% 20%;
+    --muted-foreground: 210 14% 78%; 
+    --accent: 210 11% 20%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 62.8% 50%; 
+    --destructive-foreground: 210 20% 98%;
+    --border: 210 11% 25%;
+    --input: 210 11% 25%;
+    --ring: 165 100% 35%;
+
+    /* Global Dark Mode Overrides */
+    .dark .text-gray-900 { color: var(--color-foreground) !important; }
+    .dark .text-gray-500 { color: var(--color-muted-foreground) !important; }
+    .dark .bg-gray-50 { background-color: var(--color-secondary) !important; }
+    .dark .border-gray-100 { border-color: var(--color-border) !important; }
+    .dark .hover\:bg-gray-50\/50:hover { background-color: var(--color-muted) !important; }
+  }
+}
