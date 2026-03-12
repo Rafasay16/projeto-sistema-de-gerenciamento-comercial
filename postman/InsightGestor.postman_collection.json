@@ -1,0 +1,293 @@
+{
+  "info": {
+    "_postman_id": "a889253b-770e-4fe5-ba20-d9c1c30d76b6",
+    "name": "InsightGestor",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "50583647",
+    "_collection_link": "https://go.postman.co/collection/50583647-a889253b-770e-4fe5-ba20-d9c1c30d76b6?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Aba Login / Registro",
+      "item": [
+        {
+          "name": "Registro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@loja.com\",\n    \"password\": \"senha123\",\n    \"name\": \"Administrador\",\n    \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/signup",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "signup"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@loja.com\",\n    \"password\": \"senha123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. GraphQL - Queries",
+      "item": [
+        {
+          "name": "Lista Produtos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query {\n  products {\n    id\n    name\n    category\n    price\n    stock\n  }\n}",
+                "variables": ""
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lista Clientes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query {\n  customers {\n    id\n    name\n    email\n    phone\n    tier\n    totalSpent\n  }\n}",
+                "variables": ""
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lista Vendas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query {\n  sales {\n    id\n    customerId\n    customerName\n    total\n    createdAt\n    items {\n      productId\n      productName\n      quantity\n      price\n      total\n    }\n  }\n}",
+                "variables": ""
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lista Vendas (dashboard)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query DashboardStats($startDate: String, $endDate: String) {\n  dashboardStats(startDate: $startDate, endDate: $endDate) {\n    totalRevenue\n    revenueGrowth\n    totalSales\n    averageTicket\n    topProducts {\n      name\n      revenue\n      count\n    }\n    lowStock {\n      id\n      name\n      stock\n    }\n  }\n}",
+                "variables": "{\n  \"startDate\": \"2023-01-01\",\n  \"endDate\": \"2023-12-31\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. GraphQL - Mutations",
+      "item": [
+        {
+          "name": "Criar Produto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation CreateProduct($input: ProductInput!) {\n  createProduct(input: $input) {\n    id\n    name\n    price\n    stock\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"name\": \"Novo Produto\",\n    \"category\": \"Eletrônicos\",\n    \"price\": 199.99,\n    \"stock\": 50\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Cliente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation AddCustomer($input: CustomerInput!) {\n  addCustomer(input: $input) {\n    id\n    name\n    email\n    tier\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"name\": \"João Silva\",\n    \"email\": \"joao@email.com\",\n    \"phone\": \"11999999999\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Venda",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation AddSale($customerId: String!, $customerName: String, $items: [SaleItemInput]!, $total: Float!) {\n  addSale(customerId: $customerId, customerName: $customerName, items: $items, total: $total) {\n    id\n    total\n    createdAt\n  }\n}",
+                "variables": "{\n  \"customerId\": \"69b3116491c377488127f636\",\n  \"customerName\": \"João Silva\",\n  \"total\": 199.99,\n  \"items\": [\n    {\n      \"productId\": \"69b3116091c377488127f635\",\n      \"productName\": \"Novo Produto\",\n      \"quantity\": 1,\n      \"price\": 199.99,\n      \"total\": 199.99\n    }\n  ]\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdiNmVjYmMyLWY0YmEtNGVhOS1iNWEzLWQxNWNiN2M5MzFkYyIsImVtYWlsIjoidGVzdGVAdGVzdGUuY29tIiwibmFtZSI6InRlc3RlIiwicm9sZSI6InZlbmRlZG9yIiwiaWF0IjoxNzczMjYzOTExLCJleHAiOjE3NzM4Njg3MTF9.Rwkx77iy589bHjNUpXEqtyX4A9M_NO73Zym9EHjyhL0"
+    }
+  ]
+}
