@@ -2,6 +2,18 @@
 
 Um painel administrativo completo e moderno para gerir operações de uma loja, incluindo vendas, estoque, clientes, análise de tráfego, campanhas de marketing e com aplicativo móvel integrado.
 
+# 👥 Integrantes
+
+Bruno Bezerra
+
+João Pedro Santos
+
+Matheus Nascimento
+
+Matheus Rey Rodriguez
+
+Rafael Ribeiro Carvalho
+
 ## ✨ Principais Funcionalidades
 
 - **📊 Dashboard:** Visão geral de faturamento, ticket médio e alertas de estoque crítico.
