@@ -28,20 +28,33 @@ export default function DashboardLayout() {
   useEffect(() => {
     // Recupera e decodifica o Token JWT para exibir dados do usuário logado
     const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const payload = JSON.parse(window.atob(base64));
-        const name = payload.name || "Usuário";
-        setUserData({
-          name,
-          email: payload.email || "",
-          initials: name.substring(0, 2).toUpperCase()
-        });
-      } catch (e) { 
-        console.error("Erro ao processar token de autenticação", e); 
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(window.atob(base64));
+      
+      if (payload.exp && payload.exp * 1000 < Date.now()) {
+        localStorage.removeItem("token");
+        navigate("/login");
+        return;
       }
+
+      const name = payload.name || "Usuário";
+      setUserData({
+        name,
+        email: payload.email || "",
+        initials: name.substring(0, 2).toUpperCase()
+      });
+    } catch (e) { 
+      console.error("Erro ao processar token de autenticação", e); 
+      localStorage.removeItem("token");
+      navigate("/login");
+      return;
     }
 
     // Sincronização do Tema Dark/Light
@@ -69,8 +82,22 @@ export default function DashboardLayout() {
     if (path) navigate(path);
   };
 
-  const { data: notifData } = useQuery(GET_NOTIFICATIONS, { fetchPolicy: "network-only", pollInterval: 30000 });
+  const { data: notifData, error: notifError } = useQuery(GET_NOTIFICATIONS, { fetchPolicy: "network-only", pollInterval: 30000 });
   
+  useEffect(() => {
+    if (notifError) {
+      const isAuthError = notifError.networkError?.statusCode === 401 || 
+                          notifError.message.toLowerCase().includes('token') || 
+                          notifError.message.toLowerCase().includes('unauthorized') || 
+                          notifError.message.toLowerCase().includes('não autorizado') ||
+                          notifError.message.toLowerCase().includes('não autenticado');
+      if (isAuthError) {
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+    }
+  }, [notifError, navigate]);
+
   const notifications = [];
   if (notifData) {
     (notifData.dashboardStats?.lowStock || []).forEach(item => {

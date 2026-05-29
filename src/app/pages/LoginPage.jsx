@@ -14,8 +14,19 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Inicialização do tema com base nas preferências guardadas ou do sistema
+  // Inicialização do tema com base nas preferências guardadas ou do sistema e verificação de token
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const payload = JSON.parse(window.atob(token.split('.')[1]));
+        if (!payload.exp || payload.exp * 1000 > Date.now()) {
+          navigate("/");
+          return;
+        }
+      } catch (e) { }
+    }
+
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
@@ -25,7 +36,7 @@ export default function LoginPage() {
       setIsDarkMode(false);
       document.documentElement.classList.remove('dark');
     }
-  }, []);
+  }, [navigate]);
 
   const toggleDarkMode = () => {
     const newTheme = !isDarkMode;
@@ -39,7 +50,7 @@ export default function LoginPage() {
     if (!email || !password) return toast.error("Preencha todos os campos.");
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/api/login", {
+      const res = await fetch(`http://${window.location.hostname}:3000/api/login`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });

@@ -1,4 +1,4 @@
-const BASE_URL = `http://localhost:3000/api`;
+const BASE_URL = `http://${window.location.hostname}:3000/api`;
 
 const getHeaders = () => {
   const token = localStorage.getItem("token");
