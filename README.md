@@ -108,7 +108,7 @@ Para iniciar o aplicativo móvel localmente no seu computador ou emulador:
 1. Navegue para a pasta `mobile`:
    ```bash
    cd mobile
-   ```
+   ```e
 2. Instale as dependências específicas do projeto móvel:
    ```bash
    npm install
