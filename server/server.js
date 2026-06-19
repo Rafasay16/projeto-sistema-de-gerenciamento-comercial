@@ -130,6 +130,7 @@ const typeDefs = `#graphql
   }
 
   type Mutation {
+    askChatbot(message: String!): String!
     createProduct(input: ProductInput!): Product
     updateProduct(id: ID!, input: ProductInput): Product
     deleteProduct(id: ID!): Boolean
@@ -143,8 +144,8 @@ const typeDefs = `#graphql
 
 const resolvers = {
   Query: {
-    products: async () => (await productsCollection.find().toArray()).map(p => ({ ...p, id: p._id.toString() })),
-    customers: async () => (await customersCollection.find().toArray()).map(c => ({ ...c, id: c._id.toString() })),
+    products: async () => (await productsCollection.find({ deletedAt: { $exists: false } }).toArray()).map(p => ({ ...p, id: p._id.toString() })),
+    customers: async () => (await customersCollection.find({ deletedAt: { $exists: false } }).toArray()).map(c => ({ ...c, id: c._id.toString() })),
     sales: async () => (await salesCollection.find().sort({ createdAt: -1 }).toArray()).map(s => ({ ...s, id: s._id.toString(), createdAt: new Date(s.createdAt).toISOString() })),
     analytics: async (_, { startDate, endDate }) => {
       let filter = {};
@@ -192,22 +193,59 @@ const resolvers = {
     }
   },
   Mutation: {
+    askChatbot: async (_, { message }, context) => {
+      if (!context.user) throw new Error("Unauthorized");
+      const { GoogleGenAI } = await import('@google/genai');
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      
+      const products = await productsCollection.find({ deletedAt: { $exists: false } }).toArray();
+      const lowStock = products.filter(p => p.stock < 10).map(p => `${p.name} (Estoque: ${p.stock})`).join(', ');
+      
+      const sales = await salesCollection.find().sort({ createdAt: -1 }).limit(10).toArray();
+      const recentSales = sales.map(s => {
+        const data = new Date(s.createdAt).toLocaleDateString('pt-BR');
+        const itens = (s.items || []).map(i => `${i.quantity}x ${i.productName} (R$${i.price} cada)`).join(', ');
+        return `[Data: ${data} | Cliente: ${s.customerName} | Valor Total: R$${s.total} | Itens: ${itens}]`;
+      }).join('\n');
+
+      const prompt = `Você é um assistente de gestão comercial para o app InsightGestor.
+Produtos com baixo estoque: ${lowStock || 'Nenhum'}
+Últimas vendas: ${recentSales || 'Nenhuma'}
+
+Pergunta do usuário: ${message}
+
+Responda de forma profissional e concisa.`;
+
+      try {
+        const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+        return response.text;
+      } catch (aiError) {
+        console.error('Erro na API do Gemini:', aiError.message);
+        if (aiError.message.includes('503') || aiError.message.includes('high demand')) {
+          return "Meus servidores estão temporariamente sobrecarregados (Erro 503). Por favor, tente perguntar novamente em alguns segundos!";
+        }
+        return "Desculpe, enfrentei um problema técnico ao processar sua pergunta. Tente novamente mais tarde.";
+      }
+    },
     createProduct: async (_, { input }, context) => {
       if (!context.user) throw new Error("Unauthorized");
+      if (context.user.role !== "gerente") throw new Error("Apenas gerentes podem criar produtos.");
       const newProduct = { ...input };
       const result = await productsCollection.insertOne(newProduct);
       return { ...newProduct, id: result.insertedId.toString() };
     },
     updateProduct: async (_, { id, input }, context) => {
       if (!context.user) throw new Error("Unauthorized");
+      if (context.user.role !== "gerente") throw new Error("Apenas gerentes podem editar produtos.");
       await productsCollection.updateOne({ _id: new ObjectId(id) }, { $set: input });
       const updated = await productsCollection.findOne({ _id: new ObjectId(id) });
       return { ...updated, id: updated._id.toString() };
     },
     deleteProduct: async (_, { id }, context) => {
       if (!context.user) throw new Error("Unauthorized");
-      const result = await productsCollection.deleteOne({ _id: new ObjectId(id) });
-      return result.deletedCount > 0;
+      if (context.user.role !== "gerente") throw new Error("Apenas gerentes podem excluir produtos.");
+      const result = await productsCollection.updateOne({ _id: new ObjectId(id) }, { $set: { deletedAt: new Date().toISOString() } });
+      return result.modifiedCount > 0;
     },
     addCustomer: async (_, { input }, context) => {
       if (!context.user) throw new Error("Unauthorized");
@@ -217,14 +255,16 @@ const resolvers = {
     },
     updateCustomer: async (_, { id, input }, context) => {
       if (!context.user) throw new Error("Unauthorized");
+      if (context.user.role !== "gerente") throw new Error("Apenas gerentes podem editar clientes.");
       await customersCollection.updateOne({ _id: new ObjectId(id) }, { $set: input });
       const updated = await customersCollection.findOne({ _id: new ObjectId(id) });
       return { ...updated, id: updated._id.toString() };
     },
     deleteCustomer: async (_, { id }, context) => {
       if (!context.user) throw new Error("Unauthorized");
-      const result = await customersCollection.deleteOne({ _id: new ObjectId(id) });
-      return result.deletedCount > 0;
+      if (context.user.role !== "gerente") throw new Error("Apenas gerentes podem excluir clientes.");
+      const result = await customersCollection.updateOne({ _id: new ObjectId(id) }, { $set: { deletedAt: new Date().toISOString() } });
+      return result.modifiedCount > 0;
     },
     addSale: async (_, { customerId, customerName, items, total }, context) => {
       if (!context.user) throw new Error("Unauthorized");
@@ -254,6 +294,7 @@ const resolvers = {
     },
     addCampaign: async (_, { input }, context) => {
       if (!context.user) throw new Error("Unauthorized");
+      if (context.user.role !== "gerente") throw new Error("Apenas gerentes podem criar campanhas.");
       const newCampaign = { ...input, spent: 0, impressions: 0, clicks: 0, conversions: 0, roi: 0, createdAt: new Date() };
       const result = await campaignsCollection.insertOne(newCampaign);
       return { ...newCampaign, id: result.insertedId.toString() };
