@@ -2,6 +2,13 @@
 
 Um sistema de gestão comercial distribuído e full-stack, projetado para administração completa de lojas e operações móveis de ponto de venda (POS). A arquitetura consiste em um backend GraphQL, um painel de administração web baseado em React e um aplicativo móvel nativo em React Native para a equipe de vendas de balcão.
 
+## Colaboradores:
+- Matheus Rey Rodriguez
+- Rafael Ribeiro Carvalho
+- Bruno da Silva Bezerra
+- Matheus Nascimento Farias
+- João Pedro Santos de Sousa
+
 ## Principais Funcionalidades
 
 - **Dashboard de Business Intelligence (BI):** Motor de análise em tempo real que monitora faturamento, ticket médio e desempenho de produtos.
