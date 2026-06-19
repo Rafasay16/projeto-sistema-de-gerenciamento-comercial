@@ -1,23 +1,57 @@
-# Insight Gestor — Aplicativo Móvel (Híbrido Expo Go)
+# Insight Gestor — Aplicativo Móvel (Navegação Nativa Expo Go)
 
-Este diretório contém o projeto de aplicativo móvel híbrido construído com **React Native** e **Expo**. O aplicativo funciona como um wrapper de alto desempenho da plataforma web, integrando funcionalidades nativas de dispositivo.
+Este diretório contém o projeto de aplicativo móvel construído com **React Native** e **Expo**. O aplicativo foi reestruturado de forma modular e agora conta com navegação nativa e telas independentes, servindo como uma solução híbrida de alto desempenho para encapsular a plataforma web.
 
 ---
 
 ## 📱 Recursos Implementados
 
-1. **WebView de Alta Performance (`react-native-webview`)**:
-   - Carrega a aplicação completa em tela cheia de forma fluida.
-   - Suporta navegação interna nativa e botões de voltar do Android (`BackHandler`).
+1. **Navegação Estruturada por Abas (Bottom Tab Navigation)**:
+   - Navegação nativa robusta utilizando a biblioteca oficial `@react-navigation/bottom-tabs`.
+   - Divisão clara em 3 telas funcionais construídas nativamente: **Painel (Dashboard)**, **Suporte** e **Ajustes (Configurações)**.
+
+2. **Dashboard / Painel (WebView de Alta Performance)**:
+   - Carrega a aplicação web completa de forma fluida.
+   - Suporta navegação interna no histórico da WebView e tratamento inteligente do botão voltar do Android (`BackHandler`), ativo apenas quando a aba correspondente está focada.
    - Habilita suporte a vídeo em tela cheia e armazenamento local (`domStorageEnabled`).
-2. **Tratamento Offline Amigável (`@react-native-community/netinfo`)**:
-   - Monitora o estado de conexão de internet do usuário em tempo real.
-   - Apresenta uma tela offline customizada com a identidade visual do projeto e botão de "Tentar Novamente" caso o sinal caia, evitando erros técnicos ou telas em branco.
-3. **Deep Linking Inteligente (WhatsApp, Instagram, ligações, emails)**:
-   - Captura e intercepta tentativas de navegação do WebView para links externos.
-   - Abre os apps oficiais correspondentes diretamente no celular do usuário.
-4. **Splash Screen & Ícones Customizados**:
-   - Configurados no `app.json`.
+
+3. **Ajustes Nativos (Settings Screen)**:
+   - Tela 100% nativa que permite visualizar e alterar a URL base da plataforma (`WEB_URL`) persistida no armazenamento local do celular (`AsyncStorage`).
+   - Evita a necessidade de editar o código fonte para alternar entre ambientes:
+     - **Desenvolvimento local (Emulador Android)**: `http://10.0.2.2:5173`
+     - **Desenvolvimento local (Celular físico)**: IP local do computador (ex: `http://192.168.1.15:5173`)
+     - **Produção**: URL final do domínio hospedado.
+
+4. **Suporte e Diagnóstico de Rede (Support Screen)**:
+   - Links com suporte a **Deep Linking** nativo para WhatsApp e Instagram.
+   - Diagnóstico em tempo real da conexão de rede do dispositivo (Status, Tipo de rede como WiFi/Celular, Endereço IP local) com `@react-native-community/netinfo`.
+
+5. **Tratamento Offline Amigável (`OfflineView`)**:
+   - Apresenta uma tela offline customizada com a identidade visual do projeto e botão de "Tentar Novamente" caso a conexão de internet seja interrompida.
+
+---
+
+## 📂 Estrutura do Diretório Modularizado
+
+O projeto foi organizado de forma componentizada seguindo as melhores práticas do ecossistema React Native:
+
+```text
+mobile/
+├── App.js                         # Inicializador do NavigationContainer e SafeAreaProvider
+├── app.json                       # Metadados e configurações de builds nativos (Expo)
+├── package.json                   # Dependências e scripts npm
+├── README.md                      # Guia de desenvolvimento (este arquivo)
+└── src/
+    ├── components/
+    │   ├── LoadingOverlay.js      # Spinner de carregamento da WebView
+    │   └── OfflineView.js         # Tela customizada de ausência de rede
+    ├── navigation/
+    │   └── AppNavigator.js        # Configuração das Abas (Tabs) do React Navigation
+    └── screens/
+        ├── DashboardScreen.js     # Tela com WebView e listeners de rede/voltar do Android
+        ├── SettingsScreen.js      # Tela de configurações e manipulação da URL no AsyncStorage
+        └── SupportScreen.js       # Tela com contatos e ferramentas de diagnóstico de rede
+```
 
 ---
 
@@ -33,17 +67,7 @@ Abra o terminal neste diretório e execute:
 npm install
 ```
 
-### 2. Configurar a URL do Site
-No arquivo `App.js`, localize a constante `WEB_URL` nas linhas superiores:
-```javascript
-const WEB_URL = 'http://10.0.2.2:5173';
-```
-- **Em Produção**: Mantenha a URL pública do site final.
-- **Em Desenvolvimento Local**: Se você quiser testar as suas modificações locais do site:
-  - **Emulador Android**: Mude para `http://10.0.2.2:5173` (que aponta para a porta do seu Vite dev server).
-  - **Celular físico na mesma rede Wi-Fi**: Mude para o IP local do seu computador na rede (ex: `http://192.168.1.15:5173`).
-
-### 3. Iniciar o Expo
+### 2. Iniciar o Expo
 Execute o comando:
 ```bash
 npx expo start
@@ -53,11 +77,14 @@ npx expo start
   - **Android**: Toque em "Scan QR Code" e aponte para a tela.
   - **iOS**: Abra a câmera padrão do iPhone, aponte para o QR Code e clique no link de abertura no Expo Go.
 
+### 3. Configurar a URL da Plataforma Web no App
+Com o aplicativo aberto no celular ou emulador, vá para a aba **Ajustes** na barra de navegação inferior. Digite a URL que você deseja carregar na WebView e clique em **Salvar**. A alteração é persistida localmente e refletida imediatamente quando você voltar para a aba **Painel**.
+
 ---
 
 ## 🏗️ Como Compilar e Gerar o Aplicativo (APK / AAB)
 
-Para gerar o instalador nativo do Android (`.apk` para teste ou `.aab` para publicação na Google Play Store), o Expo utiliza a ferramenta **EAS (Expo Application Services)**, facilitando o build em nuvem sem a necessidade de configurar ambientes Java/Android SDK locais no seu computador.
+Para gerar o instalador nativo do Android (`.apk` para teste ou `.aab` para publicação na Google Play Store), o Expo utiliza a ferramenta **EAS (Expo Application Services)**.
 
 ### Passo 1: Instalar o EAS CLI globalmente
 ```bash
@@ -68,7 +95,6 @@ npm install -g eas-cli
 ```bash
 eas login
 ```
-*(Caso não tenha conta, crie gratuitamente em [expo.dev](https://expo.dev)).*
 
 ### Passo 3: Configurar o EAS no projeto
 ```bash
@@ -80,22 +106,7 @@ eas build:configure
   ```bash
   eas build --platform android --profile preview
   ```
-  *(Isso gerará um arquivo `.apk` pronto para instalar e testar diretamente em qualquer celular Android).*
-
 * **Gerar arquivo de Produção (AAB)**:
   ```bash
   eas build --platform android --profile production
   ```
-  *(Gera o formato `.aab` pronto para subir e distribuir pela Google Play Store).*
-
----
-
-## 📁 Estrutura do Diretório
-
-```text
-mobile/
-├── App.js                   # Lógica principal, monitoramento de internet e WebView
-├── app.json                 # Metadados e configurações de builds nativos (Expo)
-├── package.json             # Dependências e scripts npm
-└── README.md                # Guia de desenvolvimento (este arquivo)
-```

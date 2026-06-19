@@ -1,171 +1,89 @@
-# 🛒 Dashboard de Gestão de Loja (InsightGestor)
+# InsightGestor - Sistema de Gestão Comercial Corporativa
 
-Um painel administrativo completo e moderno para gerir operações de uma loja, incluindo vendas, estoque, clientes, análise de tráfego, campanhas de marketing e com aplicativo móvel integrado.
+Um sistema de gestão comercial distribuído e full-stack, projetado para administração completa de lojas e operações móveis de ponto de venda (POS). A arquitetura consiste em um backend GraphQL, um painel de administração web baseado em React e um aplicativo móvel nativo em React Native para a equipe de vendas de balcão.
 
-# 👥 Integrantes
+## Principais Funcionalidades
 
-Bruno Bezerra
+- **Dashboard de Business Intelligence (BI):** Motor de análise em tempo real que monitora faturamento, ticket médio e desempenho de produtos.
+- **Gestão de Estoque:** Catálogo completo com operações CRUD, alertas de estoque baixo e capacidade de soft-delete para conformidade de auditoria.
+- **Customer Relationship Management (CRM):** Classificação automática de fidelidade (Bronze, Prata, Ouro) baseada em volumes cumulativos de transações.
+- **Mobile POS (Frente de Caixa):** Interface móvel nativa para processamento de transações com sincronização de estoque em tempo real.
+- **Análise Assistida por IA:** Assistente LLM integrado (Gemini 2.5 Flash) que fornece insights comerciais contextuais com base na telemetria de vendas local e níveis de estoque.
 
-João Pedro Santos
+## Stack Tecnológico
 
-Matheus Nascimento
+### Infraestrutura e Backend
+- **Ambiente de Execução:** Node.js / Express
+- **Arquitetura da API:** Apollo Server (GraphQL)
+- **Banco de Dados:** MongoDB (Atlas / Local)
+- **Autenticação:** JWT (JSON Web Tokens) com hash Bcrypt
+- **Integração de IA:** SDK Google GenAI
 
-Matheus Rey Rodriguez
+### Cliente Web (Painel Administrativo)
+- **Framework:** React / Vite
+- **Estilização:** Tailwind CSS / Shadcn UI
+- **Consumo de Dados:** Apollo Client
+- **Visualização de Dados:** Recharts
 
-Rafael Ribeiro Carvalho
-
-## ✨ Principais Funcionalidades
-
-- **📊 Dashboard:** Visão geral de faturamento, ticket médio e alertas de estoque crítico.
-- **📦 Produtos:** Gestão do catálogo de produtos e níveis de estoque.
-- **👥 Clientes:** Lista de clientes com sistema de fidelidade, histórico de gastos e divisão por Tiers (Bronze, Prata, Ouro).
-- **🛒 Pedidos:** Histórico completo de vendas, recibos detalhados e geração de novos pedidos integrados ao estoque.
-- **📈 Analytics:** Gráficos interativos de tráfego, conversão e dispositivos (Mobile/Desktop).
-- **📣 Marketing:** Controle de campanhas de tráfego pago e orgânico com cálculo automático de ROI.
-- **📱 App Mobile Híbrido:** Aplicativo móvel híbrido (Android/iOS) que encapsula a interface web com alto desempenho, suporte a gestos nativos, monitoramento de conectividade em tempo real (tela offline amigável) e redirecionamento dinâmico para apps nativos (WhatsApp, Instagram, telefone e e-mail).
-
-## 🚀 Tecnologias Utilizadas
-
-**Front-end Web:**
-
-- [React](https://reactjs.org/) (com Vite)
-- [Tailwind CSS](https://tailwindcss.com/) + UI Components (shadcn/ui adaptado)
-- [Recharts](https://recharts.org/) (Gráficos)
-- [Apollo Client](https://www.apollographql.com/docs/react/) (Consumo de GraphQL)
-- [React Router](https://reactrouter.com/) (Navegação)
-
-**Back-end:**
-
-- [Node.js](https://nodejs.org/) com Express
-- [Apollo Server](https://www.apollographql.com/docs/apollo-server/) (API GraphQL)
-- [MongoDB](https://www.mongodb.com/) (Banco de Dados)
-- Autenticação com JWT e Bcrypt
-
-**Aplicativo Mobile:**
-
-- [React Native](https://reactnative.dev/) com [Expo SDK 54](https://expo.dev/) (Expo Go)
-- [React Native WebView](https://github.com/react-native-webview/react-native-webview) (Renderização rápida da interface web)
-- [@react-native-community/netinfo](https://github.com/react-native-netinfo/react-native-netinfo) (Detecção offline em tempo real)
+### Cliente Mobile (App POS)
+- **Framework:** React Native / Expo SDK 54
+- **Roteamento:** React Navigation
+- **Estado e Dados:** Apollo Client / AsyncStorage
+- **Segurança:** Expo SecureStore para gestão criptografada de tokens
 
 ---
 
-## ⚙️ Como Inicializar localmente
+## Instalação e Configuração
 
-### 1. Instalar Dependências
+### 1. Inicialização do Servidor Backend
 
-Na raiz do projeto (para instalar dependências do Web/Back-end), rode no terminal:
+O backend expõe um endpoint GraphQL na porta 3000.
 
 ```bash
+# Instalar dependências
 npm install
-```
 
-### 2. Configurar Variáveis de Ambiente
-
-O projeto já conta com arquivos `.env` pré-configurados com um cluster do MongoDB Atlas de demonstração tanto na raiz quanto na pasta `server`. Se desejar usar seu próprio banco de dados, crie ou edite o arquivo `.env` na raiz e na pasta `server` com as seguintes variáveis:
-
-```env
-PORT=3000
-MONGODB_URI=mongodb+srv://branjomal_db_user:TqpZTiZRh0m4NcSl@cluster0.i215c9c.mongodb.net/?appName=Cluster0
-JWT_SECRET=teste
-```
-
-### 3. Popular o Banco de Dados
-
-Para preencher o banco de dados MongoDB com dados simulados de 3 anos (produtos, clientes, vendas, analytics e campanhas), execute o seguinte comando a partir da raiz do projeto:
-
-```bash
+# (Opcional) Povoar o banco de dados com dados comerciais simulados
 node server/preencherdb.js
-```
 
-_(Aguarde até a mensagem de sucesso aparecer no terminal)._
-
-### 4. Iniciar o Servidor Back-end
-
-Para iniciar o servidor GraphQL e REST do back-end, execute na raiz do projeto:
-
-```bash
+# Iniciar o servidor
 node server.js
 ```
+*O GraphQL Playground estará disponível em `http://localhost:3000/graphql`.*
 
-_(O servidor rodará em `http://localhost:3000` e o playground do Apollo Sandbox estará disponível em `http://localhost:3000/graphql`)._
+### 2. Inicialização do Dashboard Web (Exclusivo Desktop)
 
-### 5. Iniciar o Front-end Web
-
-Abra um novo terminal na raiz do projeto e execute:
+O cliente web fornece as capacidades administrativas da loja. **Nota: O Vite é utilizado única e exclusivamente para a versão Desktop com React.**
 
 ```bash
+# Iniciar o servidor de desenvolvimento do Vite
 npm run dev
 ```
+*O painel administrativo será servido em `http://localhost:5173`.*
 
-O Vite iniciará o servidor de desenvolvimento. O link padrão para entrar no site é `http://localhost:5173`.
+### 3. Inicialização do Aplicativo Mobile (Exclusivo Mobile)
 
-- [Link do Postman para testes de API](https://mattxss2-4939110.postman.co/workspace/mat's-Workspace~cdf80a5d-95c4-4a89-8e25-5f9e06982dfb/collection/50583647-2cd194c6-3990-47cd-b7a4-0023885c8916?action=share&creator=50583647&active-environment=50583647-1f40873d-6aeb-4b67-8e6a-57f524f6676f/)
-
-### 6. Iniciar o Aplicativo Mobile (Expo)
-
-Para iniciar o aplicativo móvel localmente no seu computador ou emulador:
-
-1. Navegue para a pasta `mobile`:
-   ```bash
-   cd mobile
-   ```e
-2. Instale as dependências específicas do projeto móvel:
-   ```bash
-   npm install
-   ```
-3. Inicie o servidor de desenvolvimento do Expo:
-   ```bash
-   npm start
-   ```
-4. Escaneie o QR Code gerado no terminal usando o aplicativo **Expo Go** em seu dispositivo Android ou iOS (ou pressione `a` para emulador Android ou `i` para simulador iOS).
-
----
-
-## 🌐 Como Executar em Outras Máquinas (Rede Local / Mobile Real)
-
-Para rodar a aplicação em outras máquinas da mesma rede ou testar o aplicativo móvel diretamente em um smartphone físico conectando-se ao seu computador de desenvolvimento local, siga estes passos:
-
-### Passo 1: Conectar à mesma rede
-
-Certifique-se de que o computador que executa o servidor web e o celular/outro dispositivo que acessará o sistema estejam conectados **exatamente na mesma rede Wi-Fi**.
-
-### Passo 2: Descobrir o IP Local da sua máquina
-
-Abra o terminal na sua máquina de desenvolvimento e verifique o seu IP local:
-
-- **Linux/macOS:** Execute `ifconfig` ou `ip a` (normalmente começa com `192.168.x.x` ou `10.x.x.x`).
-- **Windows:** Execute `ipconfig` no Prompt de Comando.
-
-### Passo 3: Iniciar o Front-end Web expondo-o na rede
-
-Por padrão, o Vite só atende requisições de `localhost`. Para permitir conexões externas, inicie o front-end com a flag `--host`:
+Para a parte móvel, **não se utiliza o Vite**. A inicialização é feita **apenas pelo Expo Go** ou emulador nativo.
 
 ```bash
-npm run dev -- --host
-```
-
-O console exibirá o endereço na rede local, por exemplo: `http://192.168.1.15:5173`.
-_(Nota: O front-end foi desenvolvido de forma inteligente para se conectar à API dinamicamente usando o IP de acesso atual (`window.location.hostname`). Portanto, ao acessar pelo IP, ele se comunicará com o back-end automaticamente)._
-
-### Passo 4: Configurar o IP no App Mobile
-
-Para que o WebView do aplicativo móvel saiba onde carregar a aplicação:
-
-1. Abra o arquivo `mobile/App.js` no seu editor.
-2. Altere a constante `WEB_URL` no topo do arquivo para o IP local do seu computador de desenvolvimento:
-   ```javascript
-   // Altere o IP abaixo para o IP da sua máquina de desenvolvimento
-   const WEB_URL = "http://192.168.1.15:5173";
-   ```
-
-### Passo 5: Iniciar o Expo e ler o QR Code
-
-Na pasta `mobile`, execute:
-
-```bash
+cd mobile
+npm install
 npx expo start
 ```
-
-Abra o aplicativo **Expo Go** no celular e escaneie o QR Code. O aplicativo carregará instantaneamente a aplicação web servida pelo seu computador.
+*Pressione `a` para iniciar via Emulador do Android Studio, ou escaneie o QR Code usando o aplicativo Expo Go em um dispositivo físico.*
 
 ---
+
+## Configuração de Rede do Cliente Mobile
+
+Por padrão, o cliente móvel deve ser configurado para apontar para o endpoint GraphQL do backend. A configuração é acessível através das configurações na tela de Login.
+
+### Ambiente Virtual (Emulador do Android Studio)
+Ao executar o cliente Expo através do Emulador do Android Studio na máquina host:
+- Defina a URL da API como: `http://10.0.2.2:3000`
+
+### Ambiente Físico (Rede Local - LAN)
+Ao testar em um dispositivo físico via Expo Go:
+1. Certifique-se de que a máquina host e o dispositivo físico estejam na mesma sub-rede (mesmo Wi-Fi).
+2. Obtenha o endereço IPv4 da máquina host (`ip a` no Linux, `ipconfig` no Windows).
+3. Defina a URL da API como: `http://<IPV4_DO_HOST>:3000` (ex: `http://192.168.1.15:3000`).
